@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GlobalStream Download | أسرع منصة تحميل من يوتيوب</title>
+  <meta name="description" content="GlobalStream هي المنصة العالمية رقم 1 لتحميل فيديوهات يوتيوب بجودات 4K و MP3 بلمحة بصر" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      /* Color Palette */
+      --primary: #ff0032;
+      --primary-glow: rgba(255, 0, 50, 0.4);
+      --secondary: #6c5ce7;
+      --accent: #00cec9;
+      --dark: #050508;
+      --card-bg: rgba(18, 18, 24, 0.7);
+      --glass: rgba(255, 255, 255, 0.03);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --text: #ffffff;
+      --text-muted: #a0a0b0;
+      
+      /* Typography */
+      --font-en: 'Outfit', sans-serif;
+      --font-ar: 'Cairo', sans-serif;
+      
+      /* Spacing */
+      --section-sp: 6rem;
+      --container-max: 1100px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--dark); }
+    ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+
+    body {
+      font-family: var(--font-ar);
+      background: var(--dark);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+    }
+
+    /* Ambient Background Objects */
+    .ambient-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .blob {
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: 0.15;
+      animation: drift 20s infinite alternate;
+    }
+    .blob-1 { background: var(--primary); top: -200px; left: -200px; }
+    .blob-2 { background: var(--secondary); bottom: -200px; right: -200px; animation-delay: -5s; }
+    @keyframes drift {
+      from { transform: translate(0,0) scale(1); }
+      to { transform: translate(100px, 100px) scale(1.1); }
+    }
+
+    /* Typography Utilities */
+    h1, h2, h3 { font-family: var(--font-ar); font-weight: 900; line-height: 1.2; }
+    .grad-text {
+      background: linear-gradient(135deg, #fff 30%, var(--primary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Layout Components */
+    .container { width: 90%; max-width: var(--container-max); margin: 0 auto; }
+    section { padding: var(--section-sp) 0; }
+
+    /* Navbar */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 1000;
+      padding: 1.2rem 0;
+      background: rgba(5,5,8,0.7);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--glass-border);
+      transition: all 0.3s;
+    }
+    nav.scrolled { padding: 0.8rem 0; }
+    .nav-inner { display: flex; align-items: center; justify-content: space-between; }
+    .brand {
+      display: flex; align-items: center; gap: 0.8rem;
+      text-decoration: none; font-family: var(--font-en);
+      font-weight: 900; font-size: 1.6rem; color: #fff;
+    }
+    .brand-dot { color: var(--primary); }
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a {
+      text-decoration: none; color: var(--text-muted);
+      font-size: 0.9rem; font-weight: 600;
+      transition: color 0.3s;
+    }
+    .nav-links a:hover { color: var(--primary); }
+
+    /* Hero Section */
+    .hero {
+      padding-top: 10rem;
+      text-align: center;
+      position: relative;
+    }
+    .hero-badge {
+      display: inline-block;
+      padding: 0.5rem 1.2rem;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--glass-border);
+      border-radius: 50px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      margin-bottom: 2rem;
+      color: var(--primary);
+      text-transform: uppercase;
+    }
+    .hero h1 { font-size: clamp(2.5rem, 8vw, 4.5rem); margin-bottom: 1.5rem; }
+    .hero p {
+      max-width: 600px; margin: 0 auto 3rem;
+      font-size: 1.1rem; color: var(--text-muted);
+    }
+
+    /* Downloader Interface */
+    .main-tool {
+      max-width: 800px; margin: 0 auto;
+      position: relative; z-index: 10;
+    }
+    .search-wrap {
+      background: var(--card-bg);
+      border: 1px solid var(--glass-border);
+      padding: 1rem;
+      border-radius: 24px;
+      display: flex; gap: 0.5rem;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+      transition: transform 0.3s, border-color 0.3s;
+    }
+    .search-wrap:focus-within {
+      border-color: var(--primary);
+      transform: translateY(-5px);
+    }
+    .search-wrap input {
+      flex: 1; background: transparent; border: none;
+      padding: 1rem 1.5rem; color: #fff; font-size: 1.1rem;
+      font-family: var(--font-ar); outline: none; direction: ltr;
+    }
+    .btn-main {
+      background: var(--primary); color: #fff;
+      border: none; border-radius: 16px;
+      padding: 0 2.5rem; font-weight: 800; font-size: 1rem;
+      cursor: pointer; transition: all 0.3s;
+      box-shadow: 0 10px 30px var(--primary-glow);
+    }
+    .btn-main:hover {
+      background: #ff2a55; transform: scale(1.02);
+      box-shadow: 0 15px 40px var(--primary-glow);
+    }
+    .btn-main:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Info Card & Formats */
+    .result-card {
+      display: none; margin-top: 3rem;
+      background: var(--card-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 30px; overflow: hidden;
+      animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      backdrop-filter: blur(10px);
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(40px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .result-header {
+      display: flex; gap: 2rem; padding: 2rem;
+      background: rgba(255,255,255,0.02);
+      border-bottom: 1px solid var(--glass-border);
+    }
+    .res-thumb {
+      width: 280px; height: 160px; border-radius: 20px;
+      overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      flex-shrink: 0;
+    }
+    .res-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .res-info { flex: 1; }
+    .res-info h3 { font-size: 1.5rem; margin-bottom: 1rem; }
+    .res-meta { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .meta-badge {
+      padding: 0.4rem 1rem; background: rgba(255,255,255,0.05);
+      border-radius: 10px; font-size: 0.85rem; color: var(--text-muted);
+    }
+
+    .format-grid {
+      padding: 2rem; display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1.2rem;
+    }
+    .format-item {
+      padding: 1.5rem; background: rgba(255,255,255,0.03);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px; cursor: pointer;
+      transition: all 0.3s; position: relative;
+    }
+    .format-item:hover {
+      background: rgba(255,0,50,0.05); border-color: var(--primary);
+      transform: translateY(-5px);
+    }
+    .format-item .q-label {
+      font-weight: 800; font-size: 1.2rem;
+      margin-bottom: 0.3rem; display: block;
+    }
+    .format-item .q-detail { font-size: 0.8rem; color: var(--text-muted); }
+    .format-item.mp3 { border-color: var(--secondary); }
+    .format-item.mp3:hover { background: rgba(108,92,231,0.1); border-color: var(--secondary); }
+
+    /* Features Section */
+    .features-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem; margin-top: 3rem;
+    }
+    .feat-card {
+      padding: 3rem 2rem; background: var(--card-bg);
+      border-radius: 30px; border: 1px solid var(--glass-border);
+      transition: all 0.3s;
+    }
+    .feat-card:hover { transform: translateY(-10px); border-color: var(--primary); }
+    .feat-icon {
+      width: 60px; height: 60px; background: rgba(255,0,50,0.1);
+      border-radius: 16px; display: flex; align-items: center;
+      justify-content: center; color: var(--primary);
+      margin-bottom: 2rem;
+    }
+    .feat-card h3 { margin-bottom: 1rem; }
+    .feat-card p { color: var(--text-muted); font-size: 0.95rem; }
+
+    /* FAQ Section */
+    .faq-list { max-width: 800px; margin: 3rem auto 0; }
+    .faq-item {
+      background: var(--card-bg); margin-bottom: 1rem;
+      border-radius: 20px; overflow: hidden;
+      border: 1px solid var(--glass-border);
+    }
+    .faq-q {
+      padding: 1.5rem 2rem; cursor: pointer;
+      display: flex; justify-content: space-between; align-items: center;
+      font-weight: 700; transition: background 0.3s;
+    }
+    .faq-q:hover { background: rgba(255,255,255,0.02); }
+    .faq-a {
+      padding: 0 2rem; max-height: 0; overflow: hidden;
+      transition: all 0.4s ease; color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+    .faq-item.active .faq-a { padding: 1.5rem 2rem; max-height: 200px; }
+    .faq-item.active .faq-toggle { transform: rotate(180deg); }
+
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.9);
+      backdrop-filter: blur(8px); display: none;
+      z-index: 2000; align-items: center; justify-content: center;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal {
+      background: var(--card-bg); padding: 3rem;
+      width: 90%; max-width: 450px; border-radius: 40px;
+      text-align: center; border: 1px solid var(--glass-border);
+      box-shadow: 0 30px 100px rgba(0,0,0,0.5);
+    }
+    .progress-circle {
+      width: 120px; height: 120px; margin: 0 auto 2rem;
+      position: relative;
+    }
+    .progress-circle svg { transform: rotate(-90deg); }
+    .progress-circle circle {
+      fill: none; stroke-width: 8; stroke-linecap: round;
+      stroke: var(--glass-border);
+    }
+    .progress-circle .indicator {
+      stroke: var(--primary); stroke-dasharray: 283;
+      stroke-dashoffset: 283; transition: stroke-dashoffset 0.3s;
+    }
+    .progress-text {
+      position: absolute; inset: 0; display: flex;
+      align-items: center; justify-content: center;
+      font-size: 1.8rem; font-weight: 900;
+    }
+    .download-success { display: none; }
+    .btn-dl {
+      display: block; width: 100%; padding: 1.2rem;
+      background: var(--accent); color: #000;
+      border-radius: 20px; text-decoration: none;
+      font-weight: 800; font-size: 1.1rem;
+      margin-top: 1rem; transition: transform 0.3s;
+    }
+    .btn-dl:hover { transform: translateY(-3px); }
+
+    /* Footer */
+    footer {
+      padding: 5rem 0; background: #020204;
+      border-top: 1px solid var(--glass-border);
+    }
+    .footer-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 3rem; margin-bottom: 4rem;
+    }
+    .f-col h4 { margin-bottom: 1.5rem; color: #fff; }
+    .f-col ul { list-style: none; }
+    .f-col ul li { margin-bottom: 0.8rem; }
+    .f-col ul li a { text-decoration: none; color: var(--text-muted); transition: color 0.3s; }
+    .f-col ul li a:hover { color: var(--primary); }
+    .copy { text-align: center; color: #444; font-size: 0.85rem; }
+
+    /* Mobile Responsive */
+    @media (max-width: 900px) {
+      .nav-links { display: none; }
+      .res-header { flex-direction: column; }
+      .res-thumb { width: 100%; height: 200px; }
+      :root { --section-sp: 4rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="ambient-bg">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+</div>
+
+<nav id="navbar">
+  <div class="container nav-inner">
+    <a href="#" class="brand">Global<span class="brand-dot">Stream</span></a>
+    <ul class="nav-links">
+      <li><a href="#downloader">المحمل</a></li>
+      <li><a href="#features">المميزات</a></li>
+      <li><a href="#faq">الأسئلة الشائعة</a></li>
+    </ul>
+    <div class="meta-badge" style="color: #fff; border-color: var(--primary)">v2.0 PRO</div>
+  </div>
+</nav>
+
+<section class="hero" id="downloader">
+  <div class="container" style="max-width: 900px">
+    <div class="hero-badge">Global Platform &middot; Reliable &middot; Secure</div>
+    <h1>LhachmiTube<span class="grad-text"></span>tv</span></h1>
+    <p>تجربة عالمية للتحميل بأعلى جودة ممكنة 4K. ببساطة ألصق الرابط واستمتع بالمحتوى على جهازك في ثوانٍ.</p>
+    
+    <div class="main-tool">
+      <div class="search-wrap">
+        <input type="text" id="url-input" placeholder="https://www.youtube.com/watch?v=..." spellcheck="false" />
+        <button class="btn-main" id="fetch-btn" onclick="fetchInfo()">تحليل</button>
+      </div>
+      <div id="error-box" style="display: none; color: #ff4444; margin-top: 1rem; font-weight: 700;"></div>
+    </div>
+
+    <!-- Result Card -->
+    <div class="result-card" id="video-card">
+      <div class="result-header">
+        <div class="res-thumb"><img id="thumbnail" src="" alt="" /></div>
+        <div class="res-info">
+          <h3 id="video-title" style="text-align: right">...</h3>
+          <div class="res-meta">
+            <div class="meta-badge" id="meta-duration">00:00</div>
+            <div class="meta-badge" id="meta-uploader">...</div>
+            <div class="meta-badge" id="meta-views">...</div>
+          </div>
+        </div>
+      </div>
+      <div style="padding: 1.5rem 2rem 0; text-align: right; color: var(--text-muted); font-size: 0.9rem; font-weight: 700;">
+        اختر الجودة المطلوبة:
+      </div>
+      <div class="format-grid" id="formats-grid"></div>
+    </div>
+  </div>
+</section>
+
+<section id="features">
+  <div class="container">
+    <div style="text-align: center; margin-bottom: 4rem">
+      <h2 style="font-size: 2.5rem"><span class="grad-text">مميزات</span> المنصة العالمية</h2>
+    </div>
+    <div class="features-grid">
+      <div class="feat-card">
+        <div class="feat-icon">🚀</div>
+        <h3>سرعة فائقة</h3>
+        <p>نستخدم خوادم سحابية متطورة تضمن معالجة الفيديوهات بسرعات غير مسبوقة دون أي تأخير.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">📺</div>
+        <h3>دقة 4K كاملة</h3>
+        <p>ندعم جميع الجودات المتاحة بما في ذلك Ultra HD و Quad HD لضمان أفضل تجربة مشاهدة.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🎵</div>
+        <h3>صوت نقي MP3</h3>
+        <p>استخرج الملفات الصوتية بأعلى معدل بث متاح (192kbps) لتتمتع بنقاء صوتي مذهل.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="container">
+    <div style="text-align: center; margin-bottom: 4rem">
+      <h2 style="font-size: 2.5rem">الأسئلة <span class="grad-text">الشائعة</span></h2>
+    </div>
+    <div class="faq-list">
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">ماهي الجودات التي تدعمونها؟ <span class="faq-toggle">▼</span></div>
+        <div class="faq-a">ندعم جميع الجودات المتاحة من 144p وحتى 4K، بالإضافة إلى التحويل المباشر لصيغة MP3.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">هل الخدمة مجانية؟ <span class="faq-toggle">▼</span></div>
+        <div class="faq-a">نعم، المنصة مجانية بالكامل وستبقى كذلك، دون الحاجة لإنشاء حساب أو تثبيت أي إضافات.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">كيفية التحميل على الهواتف؟ <span class="faq-toggle">▼</span></div>
+        <div class="faq-a">ببساطة افتح الموقع من أي متصفح على هاتفك (Android أو iPhone) وكرر نفس الخطوات. الموقع متجاوب بالكامل.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="f-col">
+        <a href="#" class="brand">Global<span class="brand-dot">Stream</span></a>
+        <p style="margin-top: 1rem; color: var(--text-muted); font-size: 0.9rem">المنصة الرائدة في تحويل وتحميل محتوى الفيديو عبر الإنترنت بمعايير عالمية.</p>
+      </div>
+      <div class="f-col">
+        <h4>روابط سريعة</h4>
+        <ul>
+          <li><a href="#downloader">المحمل</a></li>
+          <li><a href="#features">المميزات</a></li>
+          <li><a href="#faq">الأسئلة الشائعة</a></li>
+        </ul>
+      </div>
+      <div class="f-col">
+        <h4>قانوني</h4>
+        <ul>
+          <li><a href="#">سياسة الخصوصية</a></li>
+          <li><a href="#">شروط الاستخدام</a></li>
+          <li><a href="#">DMCA</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="copy">
+      &copy; 2026 GlobalStream Inc. All Rights Reserved. Not affiliated with Google or YouTube.
+    </div>
+  </div>
+</footer>
+
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div id="progress-container">
+      <div class="progress-circle">
+        <svg width="120" height="120">
+          <circle cx="60" cy="60" r="45" />
+          <circle cx="60" cy="60" r="45" class="indicator" id="prog-circle" />
+        </svg>
+        <div class="progress-text" id="prog-val">0%</div>
+      </div>
+      <h3 id="modal-title">جاري المعالجة</h3>
+      <p id="modal-status" style="margin-top: 0.5rem; color: var(--text-muted)">يرجى عدم إغلاق هذه الصفحة</p>
+    </div>
+    
+    <div class="download-success" id="download-ready">
+      <div style="font-size: 3rem; margin-bottom: 1rem">✅</div>
+      <h3>جهازك جاهز!</h3>
+      <p style="margin-bottom: 2rem">تمت معالجة الفيديو بنجاح، اضغط أدناه للحفظ</p>
+      <a href="#" class="btn-dl" id="dl-link" download>حفظ الملف الآن</a>
+    </div>
+    
+    <button onclick="closeModal()" style="background: none; border: 1px solid var(--glass-border); color: #666; padding: 0.6rem 2rem; border-radius: 12px; margin-top: 2rem; cursor: pointer; font-family: var(--font-ar)">إلغاء</button>
+  </div>
+</div>
+
+<script>
+  window.addEventListener('scroll', () => {
+    document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 50);
+  });
+
+  function toggleFaq(el) {
+    el.parentElement.classList.toggle('active');
+  }
+
+  function formatViews(n) {
+    if (!n) return '---';
+    if (n >= 1e6) return (n/1e6).toFixed(1) + 'M views';
+    if (n >= 1e3) return (n/1e3).toFixed(1) + 'K views';
+    return n + ' views';
+  }
+
+  function formatDuration(sec) {
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return `${m}:${String(s).padStart(2,'0')}`;
+  }
+
+  let currentUrl = '';
+  let currentTaskId = '';
+  let pollInterval = null;
+
+  async function fetchInfo() {
+    const url = document.getElementById('url-input').value.trim();
+    if (!url) return;
+    
+    const btn = document.getElementById('fetch-btn');
+    const err = document.getElementById('error-box');
+    currentUrl = url;
+    
+    btn.disabled = true;
+    btn.textContent = 'جاري...';
+    err.style.display = 'none';
+
+    try {
+      const res = await fetch('/api/info', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({url})
+      });
+      const data = await res.json();
+      
+      if (!res.ok || data.error) throw new Error(data.error);
+
+      document.getElementById('thumbnail').src = data.thumbnail;
+      document.getElementById('video-title').textContent = data.title;
+      document.getElementById('meta-duration').textContent = formatDuration(data.duration);
+      document.getElementById('meta-uploader').textContent = data.uploader;
+      document.getElementById('meta-views').textContent = formatViews(data.view_count);
+
+      const grid = document.getElementById('formats-grid');
+      grid.innerHTML = '';
+      
+      data.formats.forEach(f => {
+        const item = document.createElement('div');
+        item.className = 'format-item' + (f.type === 'audio' ? ' mp3' : '');
+        item.onclick = () => startDownload(f.format_id, f.label);
+        item.innerHTML = `
+          <span class="q-label">${f.type === 'audio' ? '🎵 MP3 Audio' : f.label}</span>
+          <span class="q-detail">${f.type === 'audio' ? 'High Quality 192kbps' : (f.has_audio ? 'Full Media ✓' : 'Video Only')}</span>
+        `;
+        grid.appendChild(item);
+      });
+
+      document.getElementById('video-card').style.display = 'block';
+      window.scrollTo({top: document.getElementById('video-card').offsetTop - 100, behavior: 'smooth'});
+
+    } catch (e) {
+      err.textContent = e.message;
+      err.style.display = 'block';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'تحليل';
+    }
+  }
+
+  async function startDownload(fid, label) {
+    currentTaskId = 'task_' + Date.now();
+    document.getElementById('modal').classList.add('active');
+    document.getElementById('download-ready').style.display = 'none';
+    document.getElementById('progress-container').style.display = 'block';
+    document.getElementById('modal-title').textContent = `تجهيز ${label}`;
+    
+    updateProgress(0);
+    startPolling();
+
+    try {
+      const res = await fetch('/api/download', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({url: currentUrl, format_id: fid, task_id: currentTaskId})
+      });
+      const data = await res.json();
+      
+      if (!res.ok || data.error) throw new Error(data.error);
+      
+      onDownloadReady(data.filename);
+    } catch (e) {
+      alert('Error: ' + e.message);
+      closeModal();
+    }
+  }
+
+  function startPolling() {
+    pollInterval = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/progress/${currentTaskId}`);
+        const data = await res.json();
+        if (data.percent) updateProgress(data.percent);
+      } catch {}
+    }, 800);
+  }
+
+  function updateProgress(p) {
+    const offset = 283 - (p / 100 * 283);
+    document.getElementById('prog-circle').style.strokeDashoffset = offset;
+    document.getElementById('prog-val').textContent = Math.round(p) + '%';
+  }
+
+  function onDownloadReady(filename) {
+    clearInterval(pollInterval);
+    updateProgress(100);
+    setTimeout(() => {
+      document.getElementById('progress-container').style.display = 'none';
+      document.getElementById('download-ready').style.display = 'block';
+      document.getElementById('dl-link').href = `/api/file/${encodeURIComponent(filename)}`;
+    }, 500);
+  }
+
+  function closeModal() {
+    clearInterval(pollInterval);
+    document.getElementById('modal').classList.remove('active');
+  }
+
+  function stopPolling() { clearInterval(pollInterval); }
+</script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+*$py.class
+downloads/
+.venv/
+env/
+venv/
+*.local
+.pdm-python
+.env
+.pytest_cache/
+.vscode/
+.idea/
+*.exe
+*.bat
