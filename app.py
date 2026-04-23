@@ -186,10 +186,16 @@ def get_info():
     except Exception as e:
         error_msg = str(e)
         print(f"[DEBUG] Info Error: {error_msg}")
-        if "sign in to confirm" in error_msg.lower() or "bot" in error_msg.lower():
-            error_msg = "عذراً، يوتيوب يكتشف أنك تستخدم برنامجاً آلياً. يرجى رفع ملف cookies.txt لتجاوز هذا الحظر."
-        elif "403" in error_msg:
-            error_msg = "خطأ 403: تم رفض الوصول. قد يكون السيرفر محظوراً مؤقتاً."
+        
+        cookies_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'cookies.txt')
+        has_cookies = os.path.exists(cookies_path)
+        
+        if "sign in to confirm" in error_msg.lower() or "bot" in error_msg.lower() or "403" in error_msg:
+            if not has_cookies:
+                error_msg = "❌ السيرفر لا يجد ملف cookies.txt. يرجى التأكد من رفعه في المجلد الرئيسي."
+            else:
+                error_msg = "⚠️ ملف cookies.txt موجود، لكن يوتيوب لا يزال يحظر الطلب. يرجى استخراج كوكيز جديدة (Fresh Cookies) وإعادة رفعها."
+        
         return jsonify({'error': error_msg}), 500
 
 def make_progress_hook(task_id):
@@ -267,6 +273,16 @@ def download_video():
     except Exception as e:
         error_msg = str(e)
         print(f"[DEBUG] Download Error: {error_msg}")
+        
+        cookies_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'cookies.txt')
+        has_cookies = os.path.exists(cookies_path)
+        
+        if "sign in to confirm" in error_msg.lower() or "bot" in error_msg.lower() or "403" in error_msg:
+            if not has_cookies:
+                error_msg = "❌ السيرفر لا يجد ملف cookies.txt."
+            else:
+                error_msg = "⚠️ ملف cookies.txt موجود ولكن يوتيوب رفضه. حاول استخراج كوكيز جديدة."
+                
         progress_tracker[task_id] = {'status': 'error', 'percent': 0, 'error': error_msg}
         return jsonify({'error': error_msg}), 500
 
