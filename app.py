@@ -64,17 +64,27 @@ def get_ydl_base_opts():
         'noplaylist': True,
         'geo_bypass': True,
         'http_headers': {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+            'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Mobile/15E148 Safari/604.1',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
             'Accept-Language': 'en-us,en;q=0.5',
             'Sec-Fetch-Mode': 'navigate',
         },
         'extractor_args': {
             'youtube': {
-                'player_client': ['android', 'web'],
+                'player_client': ['ios', 'android'],
+                'skip': ['hls', 'dash']
             }
         },
     }
+    
+    # التحقق من وجود ملف الكوكيز لتجاوز الحظر
+    cookies_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'cookies.txt')
+    if os.path.exists(cookies_path):
+        opts['cookiefile'] = cookies_path
+        print(f"[OK] Cookies file loaded: {cookies_path}")
+    else:
+        print("[INFO] No cookies.txt found. Running without cookies.")
+
     if FFMPEG_DIR:
         opts['ffmpeg_location'] = FFMPEG_DIR
     return opts
