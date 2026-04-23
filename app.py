@@ -73,6 +73,7 @@ def get_ydl_base_opts():
             }
         },
         'check_formats': False,
+        'force_ipv4': True,  # This is the magic fix for datacenter IPs!
     }
     
     # ── COOKIES LOGIC ──
