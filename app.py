@@ -71,10 +71,13 @@ def get_ydl_base_opts():
         },
         'extractor_args': {
             'youtube': {
-                'player_client': ['ios', 'android'],
+                'player_client': ['tv', 'mweb'],
                 'skip': ['hls', 'dash']
             }
         },
+        'check_formats': False,
+        'youtube_include_dash_manifest': False,
+        'youtube_include_hls_manifest': False,
     }
     
     # التحقق من وجود ملف الكوكيز لتجاوز الحظر
