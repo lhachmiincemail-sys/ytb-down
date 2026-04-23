@@ -12,7 +12,7 @@ CORS(app)
 DOWNLOAD_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'downloads')
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
-# ── Auto-detect ffmpeg (from imageio-ffmpeg if available) ──────────────────
+# ── Auto-detect ffmpeg ──────────────────
 FFMPEG_PATH = None
 FFMPEG_DIR = None
 try:
@@ -21,12 +21,11 @@ try:
     if os.path.exists(path):
         FFMPEG_PATH = path
         FFMPEG_DIR = os.path.dirname(path)
-        # Ensure 'ffmpeg.exe' exists in that dir for yt-dlp to find it easily
         std_ffmpeg = os.path.join(FFMPEG_DIR, 'ffmpeg.exe')
-        if not os.path.exists(std_ffmpeg):
+        if not os.path.exists(std_ffmpeg) and sys.platform == 'win32':
             import shutil
             shutil.copy(path, std_ffmpeg)
-        print(f"[OK] ffmpeg verified: {std_ffmpeg}")
+        print(f"[OK] ffmpeg verified: {FFMPEG_PATH}")
 except Exception as e:
     print(f"[DEBUG] imageio-ffmpeg failed: {e}")
 
@@ -48,10 +47,8 @@ print(f"Final FFMPEG_DIR: {FFMPEG_DIR}")
 # ── Progress tracker ───────────────────────────────────────────────────────
 progress_tracker = {}
 
-
 def sanitize_filename(name):
     return re.sub(r'[\\/*?:"<>|]', '_', name)
-
 
 def get_ydl_base_opts():
     """Base yt-dlp options shared by all requests."""
@@ -71,27 +68,25 @@ def get_ydl_base_opts():
         },
         'extractor_args': {
             'youtube': {
-                'player_client': ['tv', 'mweb'],
+                'player_client': ['tv', 'web', 'ios'],
                 'skip': ['hls', 'dash']
             }
         },
         'check_formats': False,
-        'youtube_include_dash_manifest': False,
-        'youtube_include_hls_manifest': False,
     }
     
-    # التحقق من وجود ملف الكوكيز لتجاوز الحظر
+    # ── COOKIES LOGIC ──
+    # البحث عن ملف cookies.txt في نفس مجلد السكربت
     cookies_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'cookies.txt')
     if os.path.exists(cookies_path):
         opts['cookiefile'] = cookies_path
-        print(f"[OK] Cookies file loaded: {cookies_path}")
+        print(f"[OK] Using cookies from: {cookies_path}")
     else:
-        print("[INFO] No cookies.txt found. Running without cookies.")
+        print("[INFO] No cookies.txt found. Running in guest mode.")
 
     if FFMPEG_DIR:
         opts['ffmpeg_location'] = FFMPEG_DIR
     return opts
-
 
 # ── Routes ─────────────────────────────────────────────────────────────────
 
@@ -100,7 +95,6 @@ def index():
     html_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'index.html')
     with open(html_path, 'r', encoding='utf-8') as f:
         return f.read()
-
 
 @app.route('/api/info', methods=['POST'])
 def get_info():
@@ -118,11 +112,7 @@ def get_info():
 
         formats = info.get('formats', [])
         available = []
-
-        # ── Collect video formats grouped by height ───────────────────────
-        # We want ONE entry per resolution, storing the format_id of the
-        # best available stream (video+audio combined, or video-only as fallback)
-        height_map = {}   # height -> best format entry
+        height_map = {}
 
         for f in formats:
             height = f.get('height')
@@ -143,7 +133,6 @@ def get_info():
                     'has_audio': has_audio
                 }
             else:
-                # Prefer combined (has audio) over video-only
                 prev = height_map[height]
                 if not prev['has_audio'] and has_audio:
                     height_map[height] = {
@@ -156,22 +145,13 @@ def get_info():
 
         for height, entry in height_map.items():
             h = height
-            if h >= 2160:
-                label = "Ultra HD / 4K"
-            elif h >= 1440:
-                label = "Quad HD / 2K"
-            elif h >= 1080:
-                label = "Full HD (1080p)"
-            elif h >= 720:
-                label = "High Definition (720p)"
-            elif h >= 480:
-                label = "Standard (480p)"
-            elif h >= 360:
-                label = "SD Quality (360p)"
-            elif h >= 240:
-                label = "Mobile Quality (240p)"
-            else:
-                label = f"{h}p"
+            if h >= 2160: label = "Ultra HD / 4K"
+            elif h >= 1440: label = "Quad HD / 2K"
+            elif h >= 1080: label = "Full HD (1080p)"
+            elif h >= 720: label = "High Definition (720p)"
+            elif h >= 480: label = "Standard (480p)"
+            elif h >= 360: label = "SD Quality (360p)"
+            else: label = f"{h}p"
 
             available.append({
                 'format_id': entry['format_id'],
@@ -183,10 +163,7 @@ def get_info():
                 'type': 'video'
             })
 
-        # Sort by quality descending
         available.sort(key=lambda x: x['height'], reverse=True)
-
-        # ── Add MP3 option ────────────────────────────────────────────────
         available.append({
             'format_id': 'mp3',
             'label': 'MP3 (صوت فقط)',
@@ -210,11 +187,10 @@ def get_info():
         error_msg = str(e)
         print(f"[DEBUG] Info Error: {error_msg}")
         if "sign in to confirm" in error_msg.lower() or "bot" in error_msg.lower():
-            error_msg = "عذراً، يوتيوب يكتشف أنك تستخدم برنامجاً آلياً. حاول لاحقاً أو استخدم رابطاً آخر."
+            error_msg = "عذراً، يوتيوب يكتشف أنك تستخدم برنامجاً آلياً. يرجى رفع ملف cookies.txt لتجاوز هذا الحظر."
         elif "403" in error_msg:
-            error_msg = "خطأ 403: تم رفض الوصول من قبل يوتيوب. قد يكون السيرفر محظوراً مؤقتاً."
+            error_msg = "خطأ 403: تم رفض الوصول. قد يكون السيرفر محظوراً مؤقتاً."
         return jsonify({'error': error_msg}), 500
-
 
 def make_progress_hook(task_id):
     def hook(d):
@@ -222,12 +198,9 @@ def make_progress_hook(task_id):
             total = d.get('total_bytes') or d.get('total_bytes_estimate') or 0
             downloaded = d.get('downloaded_bytes', 0)
             pct = (downloaded / total * 100) if total > 0 else 0
-            # also try the percent string
             pct_str = d.get('_percent_str', '').strip().replace('%', '')
-            try:
-                pct = float(pct_str) if pct_str else pct
-            except Exception:
-                pass
+            try: pct = float(pct_str) if pct_str else pct
+            except: pass
             progress_tracker[task_id] = {
                 'status': 'downloading',
                 'percent': round(min(pct, 99), 1),
@@ -240,7 +213,6 @@ def make_progress_hook(task_id):
             progress_tracker[task_id] = {'status': 'error', 'percent': 0}
     return hook
 
-
 @app.route('/api/download', methods=['POST'])
 def download_video():
     data = request.json or {}
@@ -248,9 +220,7 @@ def download_video():
     format_id = data.get('format_id', 'best')
     task_id = data.get('task_id', 'default')
 
-    if not url:
-        return jsonify({'error': 'الرجاء إدخال رابط يوتيوب'}), 400
-
+    if not url: return jsonify({'error': 'الرجاء إدخال رابط يوتيوب'}), 400
     progress_tracker[task_id] = {'status': 'starting', 'percent': 0}
 
     try:
@@ -259,7 +229,6 @@ def download_video():
         base_opts['progress_hooks'] = [make_progress_hook(task_id)]
 
         if format_id == 'mp3':
-            # ── Audio only → MP3 ─────────────────────────────────────────
             ydl_opts = {
                 **base_opts,
                 'format': 'bestaudio/best',
@@ -270,12 +239,8 @@ def download_video():
                 }],
             }
         else:
-            # ── Video: the format_id we received is from yt-dlp itself.
-            # If the format already has audio, download it directly.
-            # Otherwise merge with the best audio stream.
             ydl_opts = {
                 **base_opts,
-                # Try: selected format + best audio  OR  selected format alone
                 'format': f'{format_id}+bestaudio[ext=m4a]/{format_id}+bestaudio/{format_id}/best',
                 'merge_output_format': 'mp4',
             }
@@ -283,56 +248,31 @@ def download_video():
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=True)
             filename = ydl.prepare_filename(info)
-
-            # Adjust for mp3 postprocessor or merged mp4
             if format_id == 'mp3':
-                base_name = os.path.splitext(filename)[0]
-                filename = base_name + '.mp3'
+                filename = os.path.splitext(filename)[0] + '.mp3'
             elif not filename.endswith('.mp4'):
-                # merge_output_format forces .mp4
-                base_name = os.path.splitext(filename)[0]
-                filename = base_name + '.mp4'
+                filename = os.path.splitext(filename)[0] + '.mp4'
 
-        # ── Verify file exists (fallback scan) ───────────────────────────
         if not os.path.exists(filename):
-            raw_title = info.get('title', '')
-            safe_title = sanitize_filename(raw_title)[:30]
-            ext_target = 'mp3' if format_id == 'mp3' else 'mp4'
-            for fname in os.listdir(DOWNLOAD_DIR):
-                if fname.endswith(ext_target) and safe_title[:15] in fname:
-                    filename = os.path.join(DOWNLOAD_DIR, fname)
-                    break
-            else:
-                # last resort: newest file
-                files = [os.path.join(DOWNLOAD_DIR, f) for f in os.listdir(DOWNLOAD_DIR)]
-                if files:
-                    filename = max(files, key=os.path.getmtime)
+            files = [os.path.join(DOWNLOAD_DIR, f) for f in os.listdir(DOWNLOAD_DIR)]
+            if files: filename = max(files, key=os.path.getmtime)
 
         progress_tracker[task_id] = {
             'status': 'ready',
             'percent': 100,
             'filename': os.path.basename(filename)
         }
-
-        return jsonify({
-            'success': True,
-            'filename': os.path.basename(filename),
-            'task_id': task_id
-        })
+        return jsonify({'success': True, 'filename': os.path.basename(filename), 'task_id': task_id})
 
     except Exception as e:
         error_msg = str(e)
         print(f"[DEBUG] Download Error: {error_msg}")
-        if "sign in to confirm" in error_msg.lower() or "bot" in error_msg.lower():
-            error_msg = "عذراً، يوتيوب يكتشف أنك تستخدم برنامجاً آلياً. حاول لاحقاً أو استخدم رابطاً آخر."
         progress_tracker[task_id] = {'status': 'error', 'percent': 0, 'error': error_msg}
         return jsonify({'error': error_msg}), 500
-
 
 @app.route('/api/progress/<task_id>')
 def get_progress(task_id):
     return jsonify(progress_tracker.get(task_id, {'status': 'unknown', 'percent': 0}))
-
 
 @app.route('/api/file/<filename>')
 def serve_file(filename):
@@ -341,7 +281,6 @@ def serve_file(filename):
         return send_file(filepath, as_attachment=True)
     return jsonify({'error': 'الملف غير موجود'}), 404
 
-
 if __name__ == '__main__':
-    print("YouTube Downloader running at: http://localhost:5000")
-    app.run(debug=False, port=5000, threaded=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(debug=False, host='0.0.0.0', port=port, threaded=True)
